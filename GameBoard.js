@@ -23,7 +23,7 @@ class GameBoard {
   level.forEach((square, i) => {
    const div = document.createElement('div');
    div.classList.add('square', CLASS_LIST[square]);
-   div.style.cssText = `width: ${CELL_SIZE}px; height: ${CELL_SIZE}px`;
+   div.style.cssText = `width: ${CELL_SIZE}px; height: ${CELL_SIZE}px;`;
    this.DOMGrid.appendChild(div);
    this.grid.push(div);
 
@@ -39,12 +39,29 @@ class GameBoard {
   this.grid[pos].classList.remove(...classes);
  }
 
- objectExist(pos, object) {
+ objectExist = (pos, object) => {
   return this.grid[pos].classList.contains(object);
  }
 
  rotateDiv(pos, deg) {
-  this.grid[pos].style.transform = `rotate({deg}deg)`;
+  this.grid[pos].style.transform = `rotate(${deg}deg)`;
+ }
+
+ moveCharacter(character) {
+  if (character.shouldMove()) {
+   const { nextMovePos, direction } = character.getNextMove(this.objectExist);
+   const { classesToRemove, classesToAdd } = character.makeMove();
+
+   if (character.rotation && nextMovePos !== character.pos) {
+    this.rotateDiv(nextMovePos, character.dir.rotation);
+    this.rotateDiv(character.pos, 0);
+   }
+
+   this.removeObject(character.pos, classesToRemove);
+   this.addObject(nextMovePos, classesToAdd);
+
+   character.setNewPos(nextMovePos, direction);
+  }
  }
 
  static createGameBoard(DOMGrid, level) {
@@ -53,3 +70,5 @@ class GameBoard {
   return board;
  }
 }
+
+export default GameBoard;
